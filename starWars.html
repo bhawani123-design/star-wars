@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <title>Star Wars</title>
+    <style>
+      body {
+        background-color: black;
+      }
+      .main {
+        width: 80%;
+        margin: auto;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: black;
+      }
+      .insideMain {
+        height: 20%;
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        background-color: black;
+      }
+      .insideMain img {
+        width: 150px;
+        height: 100px;
+        /* text-align: center; */
+        margin: auto;
+        margin-top: 0px;
+      }
+      .search {
+        width: 90%;
+        height: 32px;
+        border: none;
+        border-radius: 10px;
+        background-color: transparent;
+        color: white;
+        outline: none;
+      }
+      .icon {
+        float: right;
+        /* background-color: yellow;
+        border-radius: 18px; */
+        color: rgba(233, 210, 78, 0.719);
+      }
+      .searchDiv {
+        border-radius: 8px;
+        background-color: rgba(53, 50, 50, 0.835);
+        margin-top: 30px;
+      }
+      .suggestion {
+        color: white;
+        cursor: pointer;
+      }
+      /* .detail {
+        background-color: wheat;
+      } */
+      .detail div {
+        background-color: gray;
+        color: white;
+        border-radius: 10px;
+        min-height: 40px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <div class="insideMain">
+        <img
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4mPGm-gvEqXdJpH5a1HzOxXjK5njtnWgv9A&usqp=CAU"
+          alt="Star Wars logo"
+        />
+        <div class="searchDiv">
+          <input
+            oninput="throttleFunction()"
+            type="text"
+            name=""
+            id="search"
+            class="search"
+            placeholder="Search characters"
+          />
+          <i class="fa fa-search icon" style="font-size: 36px"></i>
+        </div>
+        <div class="suggestion" id="suggestion"></div>
+        <div id="detail"></div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  let sugDiv = document.getElementById("suggestion");
+  let showD = document.getElementById("detail");
+
+  let tm;
+  async function fetchData() {
+    let query = document.getElementById("search").value;
+    if (query.length <= 2) {
+      return false;
+    }
+    let res = await fetch(`https://swapi.dev/api/people/?search=${query}`);
+    // console.log("res:", res);
+    let data = await res.json();
+    console.log("data:", data.results);
+    return data.results;
+  }
+
+  function appendDiv(d) {
+    let inDiv = document.createElement("div");
+    sugDiv.innerHTML = null;
+    showD.innerHTML = null;
+    d.forEach(({ name }) => {
+      console.log("name:", name);
+      let p_in = document.createElement("p");
+      p_in.addEventListener("click", showDetail(d));
+      p_in.innerHTML = name;
+      inDiv.append(p_in);
+    });
+    sugDiv.append(inDiv);
+  }
+
+  async function main() {
+    let character = await fetchData();
+
+    appendDiv(character);
+  }
+
+  function throttleFunction() {
+    if (tm) {
+      return false;
+    }
+
+    tm = setTimeout(() => {
+      main();
+      tm = undefined;
+    }, 2000);
+  }
+
+  function showDetail(de) {
+    console.log(de.length);
+    showD.innerHTML = null;
+    showD.setAttribute("class", "detail");
+    de.forEach(({ name, gender, birth_year, mass }) => {
+      console.log(name, gender, birth_year, mass);
+      let genderD = document.createElement("div");
+      let bID = document.createElement("div");
+      let massD = document.createElement("div");
+      let nameD = document.createElement("div");
+      nameD.innerHTML = `<h3>name:${name} <h3>`;
+      genderD.innerHTML = `<h3>gender:${gender} <h3>`;
+      bID.innerHTML = `<h3>birth_year:${birth_year} <h3>`;
+      massD.innerHTML = `<h3>mass:${mass} <h3>`;
+      showD.append(nameD, genderD, bID, massD);
+    });
+  }
+</script>
